@@ -1,0 +1,37 @@
+region,target,year,forecast_value
+East,L1_Disease_Severity,2026,0.7731818181818181
+East,L1_Crop_Incidence,2026,39.387204545454544
+East,L2_Disease_Severity,2026,2.412863636363636
+East,L2_Crop_Incidence,2026,61.548818181818184
+East Midlands,L1_Disease_Severity,2026,0.7632954545454544
+East Midlands,L1_Crop_Incidence,2026,47.36456913787645
+East Midlands,L2_Disease_Severity,2026,2.3089999999999997
+East Midlands,L2_Crop_Incidence,2026,73.19374533741167
+North East,L1_Disease_Severity,2026,0.7371918218686645
+North East,L1_Crop_Incidence,2026,39.35448781
+North East,L2_Disease_Severity,2026,2.452145981945401
+North East,L2_Crop_Incidence,2026,64.92695712917956
+North West,L1_Disease_Severity,2026,1.3564510604307398
+North West,L1_Crop_Incidence,2026,35.626897615925664
+North West,L2_Disease_Severity,2026,3.712561011
+North West,L2_Crop_Incidence,2026,36.745126674828555
+South East,L1_Disease_Severity,2026,1.2880227272727274
+South East,L1_Crop_Incidence,2026,55.77852042589441
+South East,L2_Disease_Severity,2026,4.064295454545455
+South East,L2_Crop_Incidence,2026,77.77829378323212
+South West,L1_Disease_Severity,2026,1.6229545454545453
+South West,L1_Crop_Incidence,2026,56.906202128237624
+South West,L2_Disease_Severity,2026,5.664136363636364
+South West,L2_Crop_Incidence,2026,77.82886607445512
+Wales,L1_Disease_Severity,2026,4.511485218163432
+Wales,L1_Crop_Incidence,2026,69.89187356591091
+Wales,L2_Disease_Severity,2026,9.349068218
+Wales,L2_Crop_Incidence,2026,97.91323121653674
+West Midlands,L1_Disease_Severity,2026,1.5358298161656312
+West Midlands,L1_Crop_Incidence,2026,62.43744472582135
+West Midlands,L2_Disease_Severity,2026,3.806886363636364
+West Midlands,L2_Crop_Incidence,2026,84.51287594441305
+Yorkshire and The Humber,L1_Disease_Severity,2026,1.1440460283690106
+Yorkshire and The Humber,L1_Crop_Incidence,2026,56.56778199220119
+Yorkshire and The Humber,L2_Disease_Severity,2026,3.4441029867874597
+Yorkshire and The Humber,L2_Crop_Incidence,2026,82.41590387357988

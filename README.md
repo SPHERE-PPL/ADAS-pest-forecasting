@@ -14,17 +14,19 @@ The aim of this contest is to develop a model capable of forecasting the inciden
 
 ## Data
 
-The target outcome variable comprises annual measurements of disease severity and crop incidence of Zymoseptoria tritici and Yellow rust on wheat leaves 1 and 2 across regions of the UK. These outcome data are sourced from the [ADAS Crop Pest and Disease Survey](https://www.pestanddiseasesurvey.co.uk/).
+The target outcome variable (data/agronomic_data.csv) comprises annual measurements of disease severity and crop incidence of Zymoseptoria tritici and Yellow rust on wheat leaves 1 and 2 across regions of the UK. These outcome data are sourced from the [ADAS Crop Pest and Disease Survey](https://www.pestanddiseasesurvey.co.uk/).
+
+Once algorithms are submitted the data for the assessment period of 2026 will be released. In the current development dataset, this period is represented by dummy values (-9999).
 
 Participants are encouraged to source, curate, and integrate relevant external explanatory datasets to improve predictive performance. The repository includes several potential starting points including:
 
-[ADAS Agronomic Data](https://www.pestanddiseasesurvey.co.uk/the-database)
+[ADAS Agronomic Data](https://www.pestanddiseasesurvey.co.uk/the-database) (data/agronomic_data.csv)
 
-[COPERNICUS Bioclimate Data](https://cds.climate.copernicus.eu/datasets/sis-biodiversity-cmip5-global?tab=overview)
+[COPERNICUS Bioclimate Data](https://cds.climate.copernicus.eu/datasets/sis-biodiversity-cmip5-global?tab=overview) (data/bioclim_data.csv)
 
-[DEFRA Pesticide Usage Data]( https://pusstats.fera.co.uk/home)
+[DEFRA Pesticide Usage Data]( https://pusstats.fera.co.uk/home) (data/fungicide_data.csv)
 
-[LUH2 Land Use Data]( https://luh.umd.edu/index.shtml)
+[LUH2 Land Use Data]( https://luh.umd.edu/index.shtml) (data/prop_LUC.csv)
 
 
 ## Joining the contest & Getting Started
@@ -40,14 +42,27 @@ To download the data without a github account, click the code box dropdown and d
 
 -   Any coding languages are allowed but all analyses must be reproducible by the panel.
 -   All entries must be loaded into a public Github repo.
--   All entries must follow the submission formats outlined below.
+-   All entries must follow the submission formats outlined below and in the example folder.
 -   All entries must include a max 1000 word report to accompany the forecast analyses. This can be as a separate PDF/hmtl or incorporated into a quarto/jupyter notebook.
--   All submissions must be complete by 6th September 2026
+-   Participants must submit their final algorithms by 6 September 2026.
+-   The assessment dataset will be released on the 14 September 2026, upon which competitors must apply their submitted algorithms in generating forecasts over the assessment period of 2026. 
+-   The final deadline for participants to submit their forecasts is 28 September 2026. Final submissions will be compared with those made prior to the release of the assessment dataset to verify that the algorithms have remained consistent.
 
 
 ## How to Win!
 
-Contest participants are required to develop a modelling algorithm to forecast the incidence and severity of both Zymoseptoria tritici and yellow rust on wheat leaves 1 and 2 across UK regions for the 2026 growing season. An example modelling pipeline is provided in the repository to guide development. Target (Y) values for 2026 have been withheld and replaced with -9999. An example report and submission template has also been provided. 
+Contest participants are required to develop a modelling algorithm to forecast the incidence and severity of both Zymoseptoria tritici and yellow rust on wheat leaves 1 and 2 across UK regions for the 2026 growing season. An example modelling pipeline is provided in the repository to guide development.
+
+Target variables:
+
+-   L1_Zymoseptoria_tritici_Disease_Severity
+-   L1_Yellow_rust_Disease_Severity
+-   L1_Zymoseptoria_tritici_Crop_Incidence
+-   L1_Yellow_rust_Crop_Incidence
+-   L2_Zymoseptoria_tritici_Disease_Severity
+-   L2_Yellow_rust_Disease_Severity
+-   L2_Zymoseptoria_tritici_Crop_Incidence
+-   L2_Yellow_rust_Crop_Incidence
 
 Awards will be given across three categories:
 
@@ -62,7 +77,9 @@ The winners will be selected by the SPHERE-PPL Team and will be invited to prese
 
 ## How to Submit
 
-If you forked the repo, congratulations, you have almost entered the contest! Make sure to update your repo with your results! Forecasts and reports should be saved into the submission folder, matching the template found within. We will run the [Forecast AggregatoR](https://github.com/SPHERE-PPL/Forecast-AggregatoR) the day following the close of the contest and your repo will be collated with the entries.
+An example report and submission template has been provided.
+
+If you forked the repo, congratulations, you have almost entered the contest! Make sure to update your repo with your results! Forecasts and reports should be saved into the submission folder, matching the template found within with your own forecasted values. We will run the [Forecast AggregatoR](https://github.com/SPHERE-PPL/Forecast-AggregatoR) the day following the close of the contest and your repo will be collated with the entries.
 
 If you did not fork the repo, please send an email to [info\@sphere-ppl.org](mailto:info@sphere-ppl.org) with a link to your public github repo where your forecast and report are stored. These will then be collated with the other entries.
 

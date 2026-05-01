@@ -355,16 +355,17 @@ display: none;
 <div id="wheat-disease-forecasting-using-elastic-net-regression" class="section level1">
 <h1>Wheat Disease Forecasting Using Elastic Net Regression</h1>
 <p><strong>Author:</strong> Alex Rabeau<br />
-<strong>Date:</strong> March 2026</p>
+<strong>Date:</strong> April 2026</p>
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
 <p>This report presents a forecasting pipeline for predicting wheat
-disease severity and crop incidence across UK regions using an Elastic
-Net regression framework.</p>
+disease (Zymoseptoria tritici and Yellow rust) severity and crop
+incidence across UK regions using an Elastic Net regression
+framework.</p>
 <p>The workflow integrates multiple datasets, including pest
 observations, agronomic variables, bioclimatic indicators, fungicide
-usage, and land-use composition.<br />
-Key features include lagged variable construction, Kalman-based
+usage, and land-use composition.</p>
+<p>Key features include lagged variable construction, Kalman-based
 imputation, skewness correction, and region-specific modelling.</p>
 <p>The target variables are:</p>
 <ul>
@@ -375,65 +376,84 @@ imputation, skewness correction, and region-specific modelling.</p>
 </ul>
 <hr />
 </div>
-<div id="data-loading-and-harmonisation" class="section level2">
-<h2>1. Data Loading and Harmonisation</h2>
-<p>We begin by extracting and cleaning disease observations from
-multiple Excel sheets.</p>
-<p>Column names are standardised and unnecessary variables removed to
-ensure consistency across sources.</p>
-<pre class="python"><code>import pandas as pd
+<div id="package-and-function-loading" class="section level2">
+<h2>1. Package and Function Loading</h2>
+<p>We begin by configuring the analysis environment, including loading
+the required packages, defining helper functions, and setting key
+modelling parameters.</p>
+<pre class="python"><code># Import packages and functions
+import pandas as pd
 import numpy as np
+from scipy.stats import skew
 
-PEST_FILE = &quot;data/regional-mean-time-series-wheat-october-2025.xlsx&quot;
-
-def process_leaf(sheet, prefix):
-
-    df = pd.read_excel(PEST_FILE, sheet_name=sheet)
-
-    df.columns = df.columns + df.iloc[0].astype(str)
-    df = df.iloc[1:]
-
-    df = df.loc[:, df.columns.str.contains(
-        &quot;Survey_year|Region|Zymoseptoria_tritici&quot;
-    )]
-
-    df.columns = df.columns.str.replace(&quot;.*Survey_year.*&quot;,&quot;Survey_year&quot;, regex=True)
-    df.columns = df.columns.str.replace(&quot;.*Region.*&quot;,&quot;Region&quot;, regex=True)
-    df.columns = df.columns.str.replace(&quot;.*severity.*&quot;,f&quot;{prefix}_Disease_Severity&quot;, regex=True)
-    df.columns = df.columns.str.replace(&quot;.*Plant Incidence.*&quot;,f&quot;{prefix}_Plant_Incidence&quot;, regex=True)
-    df.columns = df.columns.str.replace(&quot;.*Crop Incidence.*&quot;,f&quot;{prefix}_Crop_Incidence&quot;, regex=True)
-
-    return df
-
-leaf1 = process_leaf(&quot;Leaf 1 (Flag leaf)&quot;, &quot;L1&quot;)
-leaf2 = process_leaf(&quot;Leaf 2&quot;, &quot;L2&quot;)
-
-regional_wheat_leaf = pd.merge(
-    leaf1,
-    leaf2,
-    on=[&quot;Survey_year&quot;,&quot;Region&quot;]
-)
-
-regional_wheat_leaf = regional_wheat_leaf[
-    regional_wheat_leaf[&quot;Region&quot;] != &quot;Unknown&quot;
-].drop(columns=[&quot;L1_Plant_Incidence&quot;,&quot;L2_Plant_Incidence&quot;])</code></pre>
-</div>
-<div id="feature-integration" class="section level2">
-<h2>2. Feature Integration</h2>
-<p>The core dataset is enriched by merging with agronomic, climate,
-fungicide, and land-use datasets.</p>
-<p>All variables are aligned by Year and Region.</p>
-<pre class="python"><code>AGRONOMIC_FILE = &quot;data/agronomic_data.csv&quot;
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import ElasticNetCV, ElasticNet
+from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import TimeSeriesSplit
+from pykalman import KalmanFilter
+    
+# Set parameters
+PEST_FILE = &quot;data/pest_data.csv&quot;
+AGRONOMIC_FILE = &quot;data/agronomic_data.csv&quot;
 BIOCLIM_FILE = &quot;data/bioclim_data.csv&quot;
 FUNGICIDE_FILE = &quot;data/fungicide_data.csv&quot;
 LUC_FILE = &quot;data/prop_LUC.csv&quot;
 
+DISEASE_VARS = [
+    &quot;L1_Zymoseptoria_tritici_Disease_Severity&quot;,
+    &quot;L1_Yellow_rust_Disease_Severity&quot;,
+    &quot;L1_Zymoseptoria_tritici_Crop_Incidence&quot;,
+    &quot;L1_Yellow_rust_Crop_Incidence&quot;,
+    &quot;L2_Zymoseptoria_tritici_Disease_Severity&quot;,
+    &quot;L2_Yellow_rust_Disease_Severity&quot;,
+    &quot;L2_Zymoseptoria_tritici_Crop_Incidence&quot;,
+    &quot;L2_Yellow_rust_Crop_Incidence&quot;
+]
+
+N_LAGS = 2
+TRAIN_END = 2020
+TEST_END = 2024</code></pre>
+</div>
+<div id="data-loading-and-feature-engineering" class="section level2">
+<h2>2. Data Loading and Feature Engineering</h2>
+<p>The core dataset is loaded into the work environment.</p>
+<p>To capture temporal dynamics, we introduce lagged versions of all
+target variables. We wish to include disease variables at t-2, t-1 and t
+to predict disease severity and incidence at t+1.</p>
+<pre class="python"><code># Load data
+pest_data = pd.read_csv(PEST_FILE)
+
+# Feature engineering: lagged variables
+lagged = pest_data.copy()
+lagged[&quot;Year&quot;] = lagged[&quot;Year&quot;].astype(int)
+lagged = lagged.sort_values([&quot;Region&quot;,&quot;Year&quot;])
+
+for col in DISEASE_VARS:
+    lagged[f&quot;{col}_lead1&quot;] = (
+        lagged.groupby(&quot;Region&quot;)[col].shift(-1)
+    )
+
+    for lag in range(1, N_LAGS+1):
+        lagged[f&quot;{col}_lag{lag}&quot;] = (
+            lagged.groupby(&quot;Region&quot;)[col].shift(lag)
+        )
+
+# Set target variables
+TARGET_VARS = [f&quot;{col}_lead1&quot; for col in DISEASE_VARS]</code></pre>
+</div>
+<div id="feature-integration" class="section level2">
+<h2>3. Feature Integration</h2>
+<p>The core dataset is enriched by merging with agronomic, climate,
+fungicide, and land-use datasets.</p>
+<p>All variables are aligned by Year and Region.</p>
+<pre class="python"><code># Load in Explanatory Variables
 agronomic_data = pd.read_csv(AGRONOMIC_FILE)
 bioclim_data = pd.read_csv(BIOCLIM_FILE)
 fungicide_data = pd.read_csv(FUNGICIDE_FILE)
 luc_data = pd.read_csv(LUC_FILE)
 
-FORECASTING_DF = regional_wheat_leaf.rename(columns={&quot;Survey_year&quot;:&quot;Year&quot;})
+# Merge datasets
+FORECASTING_DF = lagged.copy()
 FORECASTING_DF[&quot;Year&quot;] = FORECASTING_DF[&quot;Year&quot;].astype(int)
 
 FORECASTING_DF = (
@@ -442,45 +462,17 @@ FORECASTING_DF = (
     .merge(bioclim_data, on=[&quot;Year&quot;,&quot;Region&quot;], how=&quot;left&quot;)
     .merge(fungicide_data, on=[&quot;Year&quot;,&quot;Region&quot;], how=&quot;left&quot;)
     .merge(luc_data, on=[&quot;Year&quot;,&quot;Region&quot;], how=&quot;left&quot;)
-)</code></pre>
-</div>
-<div id="lagged-feature-engineering" class="section level2">
-<h2>3. Lagged Feature Engineering</h2>
-<p>To capture temporal dynamics, we introduce lagged versions of all
-target variables up to 3 years within each region.</p>
-<pre class="python"><code>TARGET_VARS = [
-    &quot;L1_Disease_Severity&quot;,
-    &quot;L1_Crop_Incidence&quot;,
-    &quot;L2_Disease_Severity&quot;,
-    &quot;L2_Crop_Incidence&quot;
-]
+)
 
-N_LAGS = 3
-
-lagged = FORECASTING_DF.copy()
-lagged = lagged.sort_values([&quot;Region&quot;,&quot;Year&quot;])
-
-for col in TARGET_VARS:
-    for lag in range(1, N_LAGS+1):
-        lagged[f&quot;{col}_lag{lag}&quot;] = (
-            lagged.groupby(&quot;Region&quot;)[col].shift(lag)
-        )
-
-lagged = lagged.drop(columns=TARGET_VARS)
-
-FORECASTING_DF = FORECASTING_DF.merge(
-    lagged,
-    on=[&quot;Year&quot;,&quot;Region&quot;],
-    how=&quot;left&quot;
-)</code></pre>
+for col in FORECASTING_DF.columns:
+    if col != &quot;Region&quot;:
+        FORECASTING_DF[col] = pd.to_numeric(FORECASTING_DF[col])</code></pre>
 </div>
 <div id="missing-data-imputation-kalman-filtering" class="section level2">
 <h2>4. Missing Data Imputation (Kalman Filtering)</h2>
 <p>Missing values in predictor variables are imputed using a Kalman
 smoothing approach, which preserves temporal structure.</p>
-<pre class="python"><code>from pykalman import KalmanFilter
-
-def kalman_impute(series):
+<pre class="python"><code>def kalman_impute(series):
 
     s = series.replace([np.inf, -np.inf], np.nan)
 
@@ -490,22 +482,24 @@ def kalman_impute(series):
     filled = s.ffill().bfill()
     values = filled.values
     mask = np.isnan(s.values)
-
     kf = KalmanFilter(initial_state_mean=values[0])
 
     try:
         smoothed, _ = kf.em(values, n_iter=5).smooth(values)
         smoothed = smoothed.flatten()
         values[mask] = smoothed[mask]
+
     except:
         values[mask] = np.nanmean(values)
 
     return pd.Series(values, index=s.index)
-
+    
 disease_cols = [c for c in FORECASTING_DF.columns if &quot;L1&quot; in c or &quot;L2&quot; in c]
 
 for col in FORECASTING_DF.columns:
+
     if col not in [&quot;Year&quot;,&quot;Region&quot;] and col not in disease_cols:
+
         FORECASTING_DF[col] = kalman_impute(FORECASTING_DF[col])
 
 FORECASTING_DF = FORECASTING_DF.dropna()</code></pre>
@@ -514,32 +508,37 @@ FORECASTING_DF = FORECASTING_DF.dropna()</code></pre>
 <h2>5. Handling Skewness</h2>
 <p>Predictor variables exhibiting high skewness (|skew| &gt; 1) are
 transformed to stabilise variance and improve model performance.</p>
-<pre class="python"><code>from scipy.stats import skew
-
+<pre class="python"><code># Define predictors
 predictors = [
     c for c in FORECASTING_DF.columns
     if c not in [&quot;Year&quot;,&quot;Region&quot;] + TARGET_VARS
 ]
 
+# Handling skewness
 skewness_results = []
 
 for col in predictors:
 
     x = FORECASTING_DF[col]
+
     skew_val = skew(x, nan_policy=&quot;omit&quot;)
+
     transformation = &quot;none&quot;
 
     if abs(skew_val) &gt; 1:
 
         if skew_val &gt; 1 and (x &gt; 0).all():
+
             FORECASTING_DF[col] = np.log1p(x)
             transformation = &quot;log1p&quot;
 
         elif skew_val &gt; 1:
+
             FORECASTING_DF[col] = np.sqrt(x - x.min() + 1)
             transformation = &quot;sqrt&quot;
 
         elif skew_val &lt; -1:
+
             FORECASTING_DF[col] = x**2
             transformation = &quot;squared&quot;
 
@@ -557,16 +556,12 @@ skewness_results = pd.DataFrame(skewness_results)</code></pre>
 regression with cross-validated regularisation.</p>
 <ul>
 <li>Training period: up to 2020</li>
-<li>Testing period: 2021–2025</li>
+<li>Testing period: 2021–2024</li>
 <li>Forecast: 2026</li>
 </ul>
-<pre class="python"><code>from sklearn.preprocessing import StandardScaler
-from sklearn.linear_model import ElasticNetCV, ElasticNet
-from sklearn.metrics import mean_squared_error
-
-TRAIN_END = 2020
-TEST_END = 2025
-
+<p>Model performance is evaluated using RMSE and normalised relative
+RMSE to allow comparison across regions and targets.</p>
+<pre class="python"><code># Forecasting loop
 forecast_results = []
 performance_results = []
 
@@ -574,39 +569,48 @@ regions = FORECASTING_DF[&quot;Region&quot;].unique()
 
 for reg in regions:
 
+    print(&quot;Processing:&quot;, reg)
+
     df_region = FORECASTING_DF[FORECASTING_DF[&quot;Region&quot;]==reg]
 
+    # Train/test split based on time
     train = df_region[df_region[&quot;Year&quot;]&lt;=TRAIN_END]
     test = df_region[(df_region[&quot;Year&quot;]&gt;TRAIN_END) &amp; (df_region[&quot;Year&quot;]&lt;=TEST_END)]
 
+    # Feature scaling
     scaler = StandardScaler()
     X_train = scaler.fit_transform(train[predictors])
     X_test = scaler.transform(test[predictors])
+    tscv = TimeSeriesSplit(n_splits=5)
 
     for target in TARGET_VARS:
 
         y_train = train[target]
         y_test = test[target]
 
-        enet_cv = ElasticNetCV(l1_ratio=0.5, cv=5, random_state=123)
+        # Elastic Net with cross-validation
+        enet_cv = ElasticNetCV(l1_ratio=0.5, cv=tscv, random_state=123)
+        
+        # Fit model
         enet_cv.fit(X_train, y_train)
-
-        model = ElasticNet(alpha=enet_cv.alpha_, l1_ratio=0.5)
-        model.fit(X_train, y_train)
-
+        model = enet_cv
+        
+        # Predict on test set
         pred_test = model.predict(X_test)
 
+        # Model evaluation
         rmse = np.sqrt(mean_squared_error(y_test, pred_test))
+
+        print(target.replace(&quot;_lead1&quot;, &quot;&quot;), &quot;RMSE:&quot;, round(rmse,4))
 
         performance_results.append({
             &quot;region&quot;: reg,
-            &quot;target&quot;: target,
-            &quot;rmse&quot;: rmse,
-            &quot;min&quot;: df_region[target].min(),
-            &quot;max&quot;: df_region[target].max()
+            &quot;target&quot;: target.replace(&quot;_lead1&quot;, &quot;&quot;),
+            &quot;rmse&quot;: rmse
         })
 
-        X_future = df_region[df_region[&quot;Year&quot;]==TEST_END][predictors]
+        # Future forecast (2026)
+        X_future = df_region[df_region[&quot;Year&quot;]==2025][predictors]
 
         if not X_future.empty:
 
@@ -616,26 +620,19 @@ for reg in regions:
 
             forecast_results.append({
                 &quot;region&quot;: reg,
-                &quot;target&quot;: target,
+                &quot;target&quot;: target.replace(&quot;_lead1&quot;, &quot;&quot;),
                 &quot;year&quot;: 2026,
                 &quot;forecast_value&quot;: float(pred_2026)
             })</code></pre>
 </div>
-<div id="model-evaluation-and-forecast-output" class="section level2">
-<h2>7. Model Evaluation and Forecast Output</h2>
-<p>Model performance is evaluated using RMSE and normalised relative
-RMSE to allow comparison across regions and targets.</p>
-<pre class="python"><code>performance_results = pd.DataFrame(performance_results)
-
-performance_results[&quot;relative_rmse_pct&quot;] = (
-    performance_results[&quot;rmse&quot;] /
-    (performance_results[&quot;max&quot;] - performance_results[&quot;min&quot;])
-) * 100
+<div id="forecasting-output" class="section level2">
+<h2>7. Forecasting Output</h2>
+<pre class="python"><code># Export results
+performance_results = pd.DataFrame(performance_results)
+performance_results.to_csv(&quot;pest_model_performance.csv&quot;, index=False)
 
 forecast_results = pd.DataFrame(forecast_results)
-
-forecast_results.to_csv(&quot;pest_forecasts_2026.csv&quot;, index=False)
-performance_results.to_csv(&quot;pest_model_performance.csv&quot;, index=False)</code></pre>
+forecast_results.to_csv(&quot;pest_forecasts_2026.csv&quot;, index=False)</code></pre>
 </div>
 <div id="conclusion" class="section level2">
 <h2>Conclusion</h2>

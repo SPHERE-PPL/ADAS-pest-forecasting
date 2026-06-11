@@ -3,11 +3,11 @@
 
 ## Introduction
 
-Zymoseptoria tritici, the causal agent of Septoria tritici blotch (STB), is widely regarded as the most economically important foliar disease of winter wheat in the UK. It is estimated to cost the industry on the order of £150–250 million annually through yield losses and fungicide inputs [(Harrison et al., 2024)](https://pmc.ncbi.nlm.nih.gov/articles/PMC11716361/?utm_source=chatgpt.com). Compounding this, the pathogen has shown a strong capacity to develop resistance to multiple fungicide classes [(Birr et al., 2021)](https://www.mdpi.com/2077-0472/11/3/269?utm_source=chatgpt.com).
+Zymoseptoria tritici, the causal agent of Septoria tritici blotch (STB), is widely regarded as the most economically important foliar disease of winter wheat in the UK. It is estimated to cost the industry on the order of £150–250 million annually through yield losses and fungicide inputs [(Gosling & Roberts, 2017)](https://www.cabidigitallibrary.org/doi/pdf/10.5555/20173111727). Compounding this, the pathogen has shown a strong capacity to develop resistance to multiple fungicide classes [(Birr et al., 2021)](https://www.mdpi.com/2077-0472/11/3/269).
 
-Alongside STB, yellow rust caused by Puccinia striiformis represents another major threat to UK wheat production [(Chen et al., 2014)](https://pmc.ncbi.nlm.nih.gov/articles/PMC6638732/?utm_source=chatgpt.com). The disease spreads rapidly under cool, moist conditions and is characterised by yellow pustules on leaf surfaces, reducing photosynthetically active area. 
+Alongside STB, yellow rust caused by Puccinia striiformis represents another major threat to UK wheat production [(Chen et al., 2014)](https://pmc.ncbi.nlm.nih.gov/articles/PMC6638732/). The disease spreads rapidly under cool, moist conditions and is characterised by yellow pustules on leaf surfaces, reducing photosynthetically active area. 
 
-Both diseases reduce green leaf area, limiting photosynthesis and ultimately lowering yield and grain quality. In severe epidemics, yield losses can exceed 50% in susceptible, untreated crops [(Birr et al., 2021)](https://www.mdpi.com/2077-0472/11/3/269?utm_source=chatgpt.com).
+Both diseases reduce green leaf area, limiting photosynthesis and ultimately lowering yield and grain quality. In severe epidemics, yield losses can exceed 50% in susceptible, untreated crops [(Birr et al., 2021)](https://www.mdpi.com/2077-0472/11/3/269).
 
 The aim of this contest is to develop a model capable of forecasting the incidence and severity of these key wheat diseases across UK regions for 2026, enabling pre-emptive management decisions.
 

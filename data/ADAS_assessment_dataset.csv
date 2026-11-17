@@ -1,0 +1,11 @@
+﻿Year,Region,L1_Zymoseptoria_tritici_Disease_Severity,L1_Yellow_Rust_Disease_Severity,L1_Zymospetoria_tritici_Crop_Incidence,L1_Yellow_Rust_Crop_Incidence,L2_Zymoseptoria_tritici_Disease_Severity,L2_Yellow_Rust_Disease_Severity,L2_Zymospetoria_tritici_Crop_Incidence,L2_Yellow_Rust_Crop_Incidence
+2026,East,0.118,0.019,61.972,23.944,0.444,0.093,84.507,43.662
+2026,East Midlands,0.528,0.174,79.167,14.583,1.141,0.112,77.083,29.167
+2026,North East,0.205,0.060,70.000,10.000,0.818,0.214,100.000,20.000
+2026,North West,0.640,0.036,80.000,40.000,1.487,0.000,100.000,0.000
+2026,South East,0.222,0.031,67.647,32.353,0.717,0.140,94.118,38.235
+2026,South West,0.749,0.017,87.500,25.000,2.768,0.050,91.667,50.000
+2026,Wales,0.577,0.008,60.000,20.000,2.043,0.020,100.000,40.000
+2026,West Midlands,0.567,0.071,91.667,41.667,1.934,0.094,100.000,58.333
+2026,Yorkshire,0.207,0.179,79.412,29.412,0.905,0.444,94.118,50.000
+2026,National,0.344661417,0.077165354,74.11764706,25.49019608,1.098283465,89.01960784,0.147244094,41.17647059

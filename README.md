@@ -44,9 +44,8 @@ To download the data without a github account, click the code box dropdown and d
 -   All entries must be loaded into a public Github repo.
 -   All entries must follow the submission formats outlined below and in the example folder.
 -   All entries must include a max 1000 word report to accompany the forecast analyses. This can be as a separate PDF/hmtl or incorporated into a quarto/jupyter notebook.
--   Participants must submit their final algorithms by 6 September 2026.
--   The assessment dataset will be released on the 14 September 2026, upon which competitors must apply their submitted algorithms in generating forecasts over the assessment period of 2026. 
--   The final deadline for participants to submit their forecasts is 28 September 2026. Final submissions will be compared with those made prior to the release of the assessment dataset to verify that the algorithms have remained consistent.
+-   Participants must submit their final algorithms by 6 September 2026. 
+-   The final deadline for participants to submit their forecasts is 11 December 2026. Final submissions will be compared with those made prior to the release of the assessment dataset to verify that the algorithms have remained consistent.
 
 
 ## How to Win!

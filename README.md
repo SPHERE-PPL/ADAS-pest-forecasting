@@ -64,13 +64,14 @@ Target variables:
 -   L2_Zymoseptoria_tritici_Crop_Incidence
 -   L2_Yellow_rust_Crop_Incidence
 
-Awards will be given across three categories:
+Awards will be given across four categories:
 
-1. The team with the most accurate forecast of Zymoseptoria tritici, as measured by Root Mean Squared Error.  
+1. The team with the most accurate forecast of Zymoseptoria tritici disease severity, as measured by RMSE.
+2. The team with the most accurate forecast of Zymoseptoria tritici crop incidence, as measured by RMSE.  
+3. The team with the most accurate forecast of Yellow rust disease severity, as measured by RMSE.  
+4. The team with the most accurate forecast of Yellow rust crop incidence, as measured by RMSE.  
 
-2. The team with the most accurate forecast of Yellow rust, as measured by Root Mean Squared Error.  
-
-3. The team with the most interesting report.
+Please also submit any raw RMSE values (e.g. across all 8 target variables). 
 
 The winners will be selected by the SPHERE-PPL Team and will be invited to present their forecasts at the next Annual Meeting, with travel covered by the project.
 
